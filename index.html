@@ -172,7 +172,18 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h2 id="安装Nodejsnode-v-查看node版本npm-v-查看npm版本npm-install-g-cnpm-–registry-http-registry-npm-taobao-org-安装淘宝的cnpm-管理器cnpm-v-查看cnpm版本cnpm-install-g-hexo-cli-安装hexo框架hexo-v-查看hexo版本mkdir-blog-创建blog目录cd-blog-进入blog目录sudo-hexo-init-生成博客-初始化博客hexo-s-启动本地博客服务http-localhost-4000-本地访问地址hexo-n-“我的第一篇文章”-创建新的文章-返回blog目录hexo-clean-清理hexo-g-生成-Github创建一个新的仓库-YourGithubName-github-iocnpm-install-–save-hexo-deployer-git-在blog目录下安装git部署插件"><a href="#安装Nodejsnode-v-查看node版本npm-v-查看npm版本npm-install-g-cnpm-–registry-http-registry-npm-taobao-org-安装淘宝的cnpm-管理器cnpm-v-查看cnpm版本cnpm-install-g-hexo-cli-安装hexo框架hexo-v-查看hexo版本mkdir-blog-创建blog目录cd-blog-进入blog目录sudo-hexo-init-生成博客-初始化博客hexo-s-启动本地博客服务http-localhost-4000-本地访问地址hexo-n-“我的第一篇文章”-创建新的文章-返回blog目录hexo-clean-清理hexo-g-生成-Github创建一个新的仓库-YourGithubName-github-iocnpm-install-–save-hexo-deployer-git-在blog目录下安装git部署插件" class="headerlink" title="#安装Nodejsnode -v	#查看node版本npm -v	#查看npm版本npm install -g cnpm –registry&#x3D;http://registry.npm.taobao.org	#安装淘宝的cnpm 管理器cnpm -v	#查看cnpm版本cnpm install -g hexo-cli    #安装hexo框架hexo -v	#查看hexo版本mkdir blog	#创建blog目录cd blog	 #进入blog目录sudo hexo init 	#生成博客 初始化博客hexo s	#启动本地博客服务http://localhost:4000/	#本地访问地址hexo n “我的第一篇文章” #创建新的文章#返回blog目录hexo clean #清理hexo g #生成#Github创建一个新的仓库 YourGithubName.github.iocnpm install –save hexo-deployer-git #在blog目录下安装git部署插件"></a>#安装Nodejs<br>node -v	#查看node版本<br>npm -v	#查看npm版本<br>npm install -g cnpm –registry&#x3D;<a target="_blank" rel="noopener" href="http://registry.npm.taobao.org/">http://registry.npm.taobao.org</a>	#安装淘宝的cnpm 管理器<br>cnpm -v	#查看cnpm版本<br>cnpm install -g hexo-cli    #安装hexo框架<br>hexo -v	#查看hexo版本<br>mkdir blog	#创建blog目录<br>cd blog	 #进入blog目录<br>sudo hexo init 	#生成博客 初始化博客<br>hexo s	#启动本地博客服务<br><a target="_blank" rel="noopener" href="http://localhost:4000/">http://localhost:4000/</a>	#本地访问地址<br>hexo n “我的第一篇文章” #创建新的文章<br>#返回blog目录<br>hexo clean #清理<br>hexo g #生成<br>#Github创建一个新的仓库 YourGithubName.github.io<br>cnpm install –save hexo-deployer-git #在blog目录下安装git部署插件</h2><h2 id="配置-config-yml"><a href="#配置-config-yml" class="headerlink" title="#配置_config.yml "></a>#配置_config.yml </h2><pre><code># Deployment
+## Docs: https://hexo.io/docs/deployment.html
+deploy:
+      type: git
+     repo: https://github.com/YourGithubName/YourGithubName.github.io.git
+      branch: master
+</code></pre>
+<hr>
+<p>hexo d	#部署到Github仓库里<br><a target="_blank" rel="noopener" href="https://yourgithubname.github.io/">https://YourGithubName.github.io/</a>  #访问这个地址可以查看博客</p>
+<p> git clone <a target="_blank" rel="noopener" href="https://github.com/litten/hexo-theme-yilia.git">https://github.com/litten/hexo-theme-yilia.git</a> themes&#x2F;yilia  #下载yilia主题到本地</p>
+<p>#修改hexo根目录下的 _config.yml 文件 ： theme: yilia</p>
+<h2 id="hexo-c-清理一下hexo-g-生成hexo-d-部署到远程Github仓库https-YourGithubName-github-io-查看博客"><a href="#hexo-c-清理一下hexo-g-生成hexo-d-部署到远程Github仓库https-YourGithubName-github-io-查看博客" class="headerlink" title="hexo c	#清理一下hexo g	#生成hexo d	#部署到远程Github仓库https://YourGithubName.github.io/  #查看博客"></a>hexo c	#清理一下<br>hexo g	#生成<br>hexo d	#部署到远程Github仓库<br><a target="_blank" rel="noopener" href="https://yourgithubname.github.io/">https://YourGithubName.github.io/</a>  #查看博客</h2>
       
 
       
@@ -180,6 +191,21 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">调皮</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">学习笔记</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -380,6 +406,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
             <input type="checkbox" q-on="click:toggleTag(e)" q-attr="checked:showTags">
           </label>
           <ul class="article-tag-list" q-show="showTags">
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">调皮</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">学习笔记</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
