@@ -6,6 +6,7 @@
   var POSTS_PREFIX = 'source/_posts/';
   var IMAGES_PREFIX = 'source/images/';
   var TOKEN_KEY = 'hongming351.blog.admin.token';
+  var DATE_PATTERN = /^.?(\d{4})[-_]?(\d{2})[-_]?(\d{2}).?[-_.@# ]*(.*)$/;
 
   var $ = function (id) { return document.getElementById(id); };
   var els = {
@@ -17,13 +18,22 @@
     workspace: $('workspace'),
     connectionState: $('connectionState'),
     themeToggle: $('themeToggle'),
-    wordCount: $('wordCount'),
+    postCount: $('postCount'),
     newPost: $('newPost'),
     search: $('search'),
     list: $('list'),
+    docTitle: $('docTitle'),
     currentPath: $('currentPath'),
     editor: $('editor'),
     status: $('status'),
+    savedState: $('savedState'),
+    wordCount: $('wordCount'),
+    infoCategory: $('infoCategory'),
+    infoDate: $('infoDate'),
+    infoWords: $('infoWords'),
+    outline: $('outline'),
+    toggleLibrary: $('toggleLibrary'),
+    drawerBackdrop: $('drawerBackdrop'),
     save: $('save'),
     remove: $('remove'),
     uploadImage: $('uploadImage'),
@@ -102,6 +112,11 @@
     els.status.className = 'status' + (kind ? ' ' + kind : '');
   }
 
+  function setSavedState(text, kind) {
+    els.savedState.textContent = text || '';
+    els.savedState.className = 'saved-state' + (kind ? ' ' + kind : '');
+  }
+
   function setLoginStatus(text, kind) {
     els.loginStatus.textContent = text || '';
     els.loginStatus.className = 'login-status' + (kind ? ' ' + kind : '');
@@ -114,9 +129,65 @@
     els.connectionState.classList.toggle('hidden', !connected);
     els.tokenInput.value = '';
     els.tokenInput.placeholder = '粘贴 GitHub Token';
-    if (!connected) {
-      els.wordCount.textContent = '0 字';
+  }
+
+  function isMobile() {
+    return window.matchMedia('(max-width: 900px)').matches;
+  }
+
+  function closeDrawer() {
+    els.workspace.classList.remove('library-open');
+    els.drawerBackdrop.classList.remove('show');
+  }
+
+  function togglePanel() {
+    if (isMobile()) {
+      var open = els.workspace.classList.toggle('library-open');
+      els.drawerBackdrop.classList.toggle('show', open);
+    } else {
+      els.workspace.classList.toggle('focus-mode');
     }
+  }
+
+  function parsePost(path) {
+    var relative = path.slice(POSTS_PREFIX.length).replace(/\.md$/i, '');
+    var parts = relative.split('/');
+    var filename = parts.pop() || '';
+    var category = parts.join(' / ');
+    var match = filename.match(DATE_PATTERN);
+    var date = '';
+    var title = filename;
+
+    if (match) {
+      date = match[1] + '-' + match[2] + '-' + match[3];
+      title = match[4] || date;
+    }
+
+    return {
+      path: path,
+      filename: filename,
+      category: category,
+      date: date,
+      title: title
+    };
+  }
+
+  function readFrontMatter(text) {
+    var match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!match) return {};
+
+    var data = {};
+    match[1].split(/\r?\n/).forEach(function (line) {
+      var pair = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
+      if (!pair) return;
+      var value = pair[2].trim();
+      if ((value.charAt(0) === '"' && value.charAt(value.length - 1) === '"')
+        || (value.charAt(0) === "'" && value.charAt(value.length - 1) === "'")) {
+        value = value.slice(1, -1);
+      }
+      data[pair[1]] = value;
+    });
+    return data;
   }
 
   function countCharacters(text) {
@@ -124,8 +195,74 @@
     return body.replace(/\s/g, '').length;
   }
 
-  function updateWordCount() {
-    els.wordCount.textContent = countCharacters(els.editor.value) + ' 字';
+  function updateStats() {
+    var text = els.editor.value;
+    var count = countCharacters(text);
+    els.wordCount.textContent = count + ' 字';
+    els.infoWords.textContent = String(count);
+    renderOutline();
+
+    if (!current) return;
+    var frontMatter = readFrontMatter(text);
+    els.docTitle.textContent = frontMatter.title || current.info.title || '未命名日记';
+    els.infoCategory.textContent = current.info.category || '未分类';
+    els.infoDate.textContent = current.info.date
+      || (frontMatter.date ? String(frontMatter.date).slice(0, 10) : '未设置');
+  }
+
+  function renderOutline() {
+    var lines = els.editor.value.split(/\r?\n/);
+    var headings = [];
+    var inFrontMatter = false;
+
+    for (var i = 0; i < lines.length; i += 1) {
+      var line = lines[i];
+      if (i === 0 && line.trim() === '---') {
+        inFrontMatter = true;
+        continue;
+      }
+      if (inFrontMatter) {
+        if (line.trim() === '---') inFrontMatter = false;
+        continue;
+      }
+      var match = line.match(/^(#{1,4})\s+(.+?)\s*#*\s*$/);
+      if (match) {
+        headings.push({ level: match[1].length, text: match[2], line: i });
+      }
+    }
+
+    els.outline.textContent = '';
+
+    if (!headings.length) {
+      var empty = document.createElement('p');
+      empty.className = 'muted';
+      empty.textContent = '正文里添加 # 标题后显示';
+      els.outline.appendChild(empty);
+      return;
+    }
+
+    headings.forEach(function (heading) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'outline-item level-' + heading.level;
+      button.textContent = heading.text;
+      button.title = heading.text;
+      button.addEventListener('click', function () { jumpToLine(heading.line); });
+      els.outline.appendChild(button);
+    });
+  }
+
+  function jumpToLine(lineIndex) {
+    var editor = els.editor;
+    var lines = editor.value.split(/\r?\n/);
+    var offset = 0;
+    for (var i = 0; i < lineIndex && i < lines.length; i += 1) {
+      offset += lines[i].length + 1;
+    }
+    editor.focus();
+    editor.setSelectionRange(offset, offset + (lines[lineIndex] || '').length);
+    editor.scrollTop = (lineIndex / Math.max(1, lines.length - 1)) * editor.scrollHeight;
+    closeDrawer();
   }
 
   function labelFor(path) {
@@ -135,9 +272,13 @@
   function renderList() {
     var keyword = els.search.value.trim().toLowerCase();
     els.list.textContent = '';
+    els.postCount.textContent = files.length + ' 篇';
 
     var items = files.filter(function (file) {
-      return !keyword || labelFor(file.path).toLowerCase().indexOf(keyword) >= 0;
+      var info = parsePost(file.path);
+      return !keyword
+        || info.title.toLowerCase().indexOf(keyword) >= 0
+        || info.category.toLowerCase().indexOf(keyword) >= 0;
     });
 
     if (!items.length) {
@@ -149,11 +290,31 @@
     }
 
     items.forEach(function (file) {
+      var info = parsePost(file.path);
       var button = document.createElement('button');
       button.type = 'button';
       button.className = 'item' + (current && current.path === file.path ? ' active' : '');
-      button.textContent = labelFor(file.path);
       button.title = file.path;
+
+      if (info.date) {
+        var date = document.createElement('span');
+        date.className = 'item-date';
+        date.textContent = info.date;
+        button.appendChild(date);
+      }
+
+      var title = document.createElement('span');
+      title.className = 'item-title';
+      title.textContent = info.title;
+      button.appendChild(title);
+
+      if (info.category) {
+        var category = document.createElement('span');
+        category.className = 'item-cat';
+        category.textContent = info.category;
+        button.appendChild(category);
+      }
+
       button.addEventListener('click', function () { openFile(file.path); });
       els.list.appendChild(button);
     });
@@ -168,6 +329,11 @@
       }).map(function (item) {
         return { path: item.path, sha: item.sha };
       }).sort(function (a, b) {
+        var dateA = parsePost(a.path).date;
+        var dateB = parsePost(b.path).date;
+        if (dateA && dateB && dateA !== dateB) return dateB.localeCompare(dateA);
+        if (dateA && !dateB) return -1;
+        if (!dateA && dateB) return 1;
         return a.path.localeCompare(b.path, 'zh-Hans-CN');
       });
 
@@ -183,16 +349,23 @@
 
     setStatus('读取中...');
     return api('/contents/' + encPath(path) + '?ref=' + encodeURIComponent(BRANCH)).then(function (data) {
-      current = { path: path, sha: data.sha };
-      els.editor.value = b64ToText(data.content);
-      els.currentPath.textContent = labelFor(path);
+      var text = b64ToText(data.content);
+      var frontMatter = readFrontMatter(text);
+
+      current = { path: path, sha: data.sha, info: parsePost(path) };
+      els.editor.value = text;
+      els.currentPath.textContent = path;
+      els.docTitle.textContent = frontMatter.title || current.info.title || '未命名日记';
       dirty = false;
-      updateWordCount();
+      updateStats();
+      setSavedState('已保存', 'ok');
       setStatus('已加载');
       history.replaceState(null, '', '?edit=' + encodeURIComponent(path));
       renderList();
+      closeDrawer();
     }).catch(function (error) {
       setStatus(error.message, 'error');
+      setSavedState('读取失败', 'error');
     });
   }
 
@@ -209,10 +382,13 @@
     loadFiles().then(function () {
       setConnected(true);
       setStatus('已连接，共 ' + files.length + ' 篇日记', 'ok');
+
       if (pendingPath) {
         var path = pendingPath;
         pendingPath = null;
         openFile(path);
+      } else if (!current && files.length) {
+        openFile(files[0].path);
       }
     }).catch(function (error) {
       localStorage.removeItem(TOKEN_KEY);
@@ -229,6 +405,8 @@
     }
 
     setStatus('保存中...');
+    setSavedState('保存中...', '');
+
     api('/contents/' + encPath(current.path), {
       method: 'PUT',
       body: JSON.stringify({
@@ -241,15 +419,36 @@
       current.sha = result.content.sha;
       dirty = false;
       setStatus('已保存，GitHub Actions 正在自动发布（约 1 分钟）', 'ok');
+      setSavedState('已保存', 'ok');
       return loadFiles();
     }).catch(function (error) {
       setStatus(error.message, 'error');
+      setSavedState('保存失败', 'error');
     });
+  }
+
+  function resetDoc() {
+    current = null;
+    dirty = false;
+    els.editor.value = '';
+    els.docTitle.textContent = '未选择日记';
+    els.currentPath.textContent = '从左侧选择一篇日记，或新建一篇';
+    els.infoCategory.textContent = '—';
+    els.infoDate.textContent = '—';
+    els.infoWords.textContent = '0';
+    els.wordCount.textContent = '0 字';
+    els.outline.textContent = '';
+    var empty = document.createElement('p');
+    empty.className = 'muted';
+    empty.textContent = '打开日记后显示';
+    els.outline.appendChild(empty);
+    setSavedState('未选择', '');
+    history.replaceState(null, '', location.pathname);
   }
 
   function removePost() {
     if (!current) return;
-    if (!confirm('确定删除「' + labelFor(current.path) + '」？删除也会提交到仓库。')) return;
+    if (!confirm('确定删除「' + (current.info.title || labelFor(current.path)) + '」？删除也会提交到仓库。')) return;
 
     setStatus('删除中...');
     api('/contents/' + encPath(current.path), {
@@ -260,17 +459,13 @@
         branch: BRANCH
       })
     }).then(function () {
-      current = null;
-      els.editor.value = '';
-      els.currentPath.textContent = '未选择日记';
-      dirty = false;
-      updateWordCount();
-      history.replaceState(null, '', location.pathname);
+      resetDoc();
       return loadFiles();
     }).then(function () {
       setStatus('已删除', 'ok');
     }).catch(function (error) {
       setStatus(error.message, 'error');
+      setSavedState('删除失败', 'error');
     });
   }
 
@@ -340,6 +535,7 @@
       setStatus('已创建，直接写正文即可', 'ok');
     }).catch(function (error) {
       setStatus(error.message, 'error');
+      setSavedState('创建失败', 'error');
     });
   }
 
@@ -350,6 +546,8 @@
     var selected = editor.value.slice(start, end) || placeholder || '';
     editor.setRangeText(before + selected + (after || ''), start, end, 'end');
     dirty = true;
+    updateStats();
+    setSavedState('未保存', 'dirty');
     editor.focus();
   }
 
@@ -390,12 +588,8 @@
     localStorage.removeItem(TOKEN_KEY);
     token = '';
     files = [];
-    current = null;
-    dirty = false;
-    els.editor.value = '';
-    els.currentPath.textContent = '未选择日记';
     els.list.textContent = '';
-    updateWordCount();
+    resetDoc();
     setConnected(false);
     setLoginStatus('已退出，Token 已从浏览器清除', 'ok');
   });
@@ -420,6 +614,12 @@
     if (file) uploadImage(file);
   });
 
+  els.toggleLibrary.addEventListener('click', togglePanel);
+  els.drawerBackdrop.addEventListener('click', closeDrawer);
+  window.addEventListener('resize', function () {
+    if (!isMobile()) closeDrawer();
+  });
+
   document.querySelectorAll('[data-before]').forEach(function (button) {
     button.addEventListener('click', function () {
       insertText(button.dataset.before, button.dataset.after, button.dataset.placeholder);
@@ -436,7 +636,8 @@
 
   els.editor.addEventListener('input', function () {
     dirty = true;
-    updateWordCount();
+    updateStats();
+    setSavedState('未保存', 'dirty');
   });
   els.editor.addEventListener('keydown', function (event) {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {

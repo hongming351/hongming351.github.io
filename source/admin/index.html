@@ -70,8 +70,14 @@
   </div>
 
   <main id="workspace" class="workspace hidden">
-    <aside class="card sidebar">
-      <button id="newPost" class="btn btn-primary btn-block" type="button">+ 新建日记</button>
+    <aside id="library" class="library card">
+      <div class="library-head">
+        <div>
+          <h2>我的日记</h2>
+          <p id="postCount">0 篇</p>
+        </div>
+        <button id="newPost" class="btn btn-primary btn-square" type="button" title="新建日记" aria-label="新建日记">+</button>
+      </div>
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="7"></circle>
@@ -79,32 +85,73 @@
         </svg>
         <input id="search" type="search" placeholder="搜索日记">
       </div>
-      <div id="list" class="list"></div>
+      <nav id="list" class="list"></nav>
     </aside>
 
-    <section class="card editor">
-      <div class="editor-head">
-        <span id="currentPath" class="path">未选择日记</span>
-        <div class="actions">
+    <section class="studio card">
+      <div class="studio-head">
+        <button id="toggleLibrary" class="icon-btn soft" type="button" title="显示/隐藏日记列表" aria-label="显示或隐藏日记列表">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+            <path d="M9 4v16"></path>
+          </svg>
+        </button>
+        <div class="doc-meta">
+          <h1 id="docTitle">未选择日记</h1>
+          <p id="currentPath" class="path">从左侧选择一篇日记，或新建一篇</p>
+        </div>
+        <div class="studio-actions">
+          <button id="save" type="button" class="btn btn-primary">保存并发布</button>
+          <button id="remove" type="button" class="icon-btn soft danger" title="删除这篇日记" aria-label="删除这篇日记">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18"></path>
+              <path d="M8 6V4h8v2"></path>
+              <path d="M19 6l-1 14H6L5 6"></path>
+              <path d="M10 11v5M14 11v5"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="format-bar">
+        <div class="format-group">
           <button type="button" class="tool-btn" data-before="**" data-after="**" data-placeholder="加粗文字" title="加粗">B</button>
           <button type="button" class="tool-btn" data-before="## " title="二级标题">H2</button>
-          <button type="button" class="tool-btn" data-before="- " title="列表">列表</button>
-          <button type="button" class="tool-btn" data-before="[" data-after="]()" data-placeholder="链接文字" title="链接">链接</button>
+          <button type="button" class="tool-btn" data-before="- " title="无序列表">列表</button>
+          <button type="button" class="tool-btn" data-before="[" data-after="]()" data-placeholder="链接文字" title="插入链接">链接</button>
           <button id="uploadImage" type="button" class="tool-btn">图片</button>
-          <button id="save" type="button" class="btn btn-primary">保存并发布</button>
-          <button id="remove" type="button" class="btn btn-danger">删除</button>
+        </div>
+        <div class="format-meta">
+          <span id="wordCount">0 字</span>
+          <span class="kbd">Ctrl + S</span>
         </div>
       </div>
-      <textarea id="editor" spellcheck="false" placeholder="选择左侧日记，或点「新建日记」开始写。"></textarea>
-      <div class="editor-foot">
+
+      <textarea id="editor" spellcheck="false" placeholder="选择左侧日记，或点「+」新建一篇，然后从这里开始写。"></textarea>
+
+      <div class="studio-foot">
         <div id="status" class="status"></div>
-        <div class="foot-meta">
-          <span id="wordCount">0 字</span>
-          <span class="kbd">Ctrl + S 保存</span>
-        </div>
+        <span id="savedState" class="saved-state">未选择</span>
       </div>
     </section>
+
+    <aside id="inspector" class="inspector">
+      <section class="info-card card">
+        <h3>文章信息</h3>
+        <dl class="info-list">
+          <div><dt>分类</dt><dd id="infoCategory">—</dd></div>
+          <div><dt>日期</dt><dd id="infoDate">—</dd></div>
+          <div><dt>字数</dt><dd id="infoWords">0</dd></div>
+        </dl>
+      </section>
+      <section class="info-card card outline-card">
+        <h3>标题目录</h3>
+        <nav id="outline" class="outline"><p class="muted">打开日记后显示</p></nav>
+      </section>
+    </aside>
   </main>
+
+  <div id="drawerBackdrop" class="drawer-backdrop"></div>
 
   <input id="imageInput" type="file" accept="image/*" hidden>
 
