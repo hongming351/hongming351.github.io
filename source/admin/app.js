@@ -585,10 +585,16 @@
     }).then(function (result) {
       current.sha = result.content.sha;
       dirty = false;
-      updateStats();
       setStatus('已保存，GitHub Actions 正在自动发布（约 1 分钟）', 'ok');
       setSavedState('已保存', 'ok');
-      return loadFiles();
+
+      files.forEach(function (file) {
+        if (file.path === current.path) file.sha = current.sha;
+      });
+
+      try {
+        updateStats();
+      } catch (e) {}
     }).catch(function (error) {
       setStatus(error.message, 'error');
       setSavedState('保存失败', 'error');
