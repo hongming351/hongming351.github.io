@@ -289,14 +289,39 @@
     els.infoDate.textContent = date;
   }
 
+  function cleanHeading(text) {
+    return text
+      .replace(/`([^`]*)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/<[^>]+>/g, '')
+      .replace(/[*_~]/g, '')
+      .trim();
+  }
+
   function renderOutline() {
     var lines = els.editor.value.split(/\r?\n/);
     var headings = [];
+    var inFence = false;
+    var fenceChar = '';
 
     lines.forEach(function (line, index) {
+      var fence = line.match(/^[ \t]{0,3}(`{3,}|~{3,})/);
+      if (fence) {
+        if (!inFence) {
+          inFence = true;
+          fenceChar = fence[1].charAt(0);
+        } else if (fence[1].charAt(0) === fenceChar) {
+          inFence = false;
+        }
+        return;
+      }
+
+      if (inFence) return;
+      if (/^( {4,}|\t)/.test(line)) return;
+
       var match = line.match(/^(#{1,4})\s+(.+?)\s*#*\s*$/);
       if (match) {
-        headings.push({ level: match[1].length, text: match[2], line: index });
+        headings.push({ level: match[1].length, text: cleanHeading(match[2]), line: index });
       }
     });
 
@@ -431,7 +456,7 @@
 
       els.editor.value = split.body;
       els.currentPath.textContent = path;
-      els.metaTitle.value = stripQuotes(frontMatter.title || '');
+      els.metaTitle.value = stripQuotes(frontMatter.title || '') || current.info.title || '';
       els.metaTags.value = formatTags(frontMatter.tags);
       els.metaTitle.disabled = false;
       els.metaTags.disabled = false;
@@ -485,14 +510,22 @@
     }
 
     var body = els.editor.value.replace(/^\n+/, '');
-    var title = els.metaTitle.value.trim();
+    var title = els.metaTitle.value.trim() || current.info.title || '';
     var tags = parseTagsInput(els.metaTags.value);
     var content = body;
 
     if (current.hasFrontMatter || title || tags.length) {
       var frontMatter = current.hasFrontMatter ? current.frontMatter : '';
+      var existing = parseFrontMatter(frontMatter);
       frontMatter = setFrontMatterField(frontMatter, 'title', JSON.stringify(title));
       frontMatter = setFrontMatterField(frontMatter, 'tags', JSON.stringify(tags));
+
+      if (!existing.date && !current.info.date) {
+        var now = new Date();
+        var today = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+        frontMatter = setFrontMatterField(frontMatter, 'date', today + ' 00:00:00');
+      }
+
       current.frontMatter = frontMatter;
       current.hasFrontMatter = true;
       content = '---\n' + frontMatter + '\n---\n\n' + body;
@@ -512,6 +545,7 @@
     }).then(function (result) {
       current.sha = result.content.sha;
       dirty = false;
+      updateStats();
       setStatus('已保存，GitHub Actions 正在自动发布（约 1 分钟）', 'ok');
       setSavedState('已保存', 'ok');
       return loadFiles();
@@ -637,6 +671,29 @@
     });
   }
 
+  function ensureImportMetadata(text, path) {
+    var split = splitFrontMatter(text);
+    var frontMatter = parseFrontMatter(split.frontMatter);
+    var info = parsePost(path);
+    var raw = split.frontMatter;
+    var changed = false;
+
+    if (!frontMatter.title && info.title) {
+      raw = setFrontMatterField(raw, 'title', JSON.stringify(info.title));
+      changed = true;
+    }
+
+    if (!frontMatter.date && !info.date) {
+      var now = new Date();
+      var today = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+      raw = setFrontMatterField(raw, 'date', today + ' 00:00:00');
+      changed = true;
+    }
+
+    if (!changed) return text;
+    return '---\n' + raw + '\n---\n\n' + split.body;
+  }
+
   function importPostFile(event) {
     event.preventDefault();
     if (!token) return;
@@ -665,9 +722,10 @@
     els.importStatus.textContent = '导入中...';
     els.importStatus.className = 'login-status';
     file.text().then(function (text) {
+      var content = ensureImportMetadata(text, path);
       var payload = {
         message: '导入日记: ' + filename,
-        content: textToB64(text),
+        content: textToB64(content),
         branch: BRANCH
       };
       if (existing) payload.sha = existing.sha;

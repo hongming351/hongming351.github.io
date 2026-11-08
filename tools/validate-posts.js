@@ -76,6 +76,7 @@ function isTagValueValid(value) {
 
 function validateFile(file) {
   const errors = [];
+  const warnings = [];
   let source = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
   let data = {};
 
@@ -90,7 +91,7 @@ function validateFile(file) {
       }
     } catch (error) {
       errors.push(`front-matter YAML 解析失败：${error.message.split('\n')[0]}`);
-      return errors;
+      return { errors, warnings };
     }
   }
 
@@ -113,7 +114,7 @@ function validateFile(file) {
   }
 
   if (!date) {
-    errors.push('缺少日期：请在文件名前加日期（例如 2026-11-08-我的日记.md），或在 front-matter 中填写 date');
+    warnings.push('缺少日期：将使用文件时间排序。建议在文件名前加日期，或在后面保存时自动补上 date');
   }
 
   for (const field of ['tags', 'categories']) {
@@ -122,16 +123,22 @@ function validateFile(file) {
     }
   }
 
-  return errors;
+  return { errors, warnings };
 }
 
 const files = walk(POSTS_DIR, []).sort();
 const failures = [];
+const warningList = [];
 
 for (const file of files) {
-  const errors = validateFile(file);
-  if (errors.length) {
-    failures.push({ file: path.relative(process.cwd(), file), errors });
+  const result = validateFile(file);
+  const relative = path.relative(process.cwd(), file);
+
+  if (result.errors.length) {
+    failures.push({ file: relative, errors: result.errors });
+  }
+  if (result.warnings.length) {
+    warningList.push({ file: relative, warnings: result.warnings });
   }
 }
 
@@ -145,6 +152,16 @@ if (failures.length) {
   }
   console.error(`\n共检查 ${files.length} 篇文章，构建已中止。\n`);
   process.exit(1);
+}
+
+if (warningList.length) {
+  console.warn(`\n有 ${warningList.length} 篇文章需要注意（不阻止构建）：\n`);
+  for (const item of warningList) {
+    console.warn(`- ${item.file}`);
+    for (const warning of item.warnings) {
+      console.warn(`    ${warning}`);
+    }
+  }
 }
 
 console.log(`front-matter 校验通过，共检查 ${files.length} 篇文章。`);
