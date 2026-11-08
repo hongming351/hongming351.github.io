@@ -28,6 +28,8 @@
     status: $('status'),
     savedState: $('savedState'),
     wordCount: $('wordCount'),
+    metaTitle: $('metaTitle'),
+    metaTags: $('metaTags'),
     infoCategory: $('infoCategory'),
     infoDate: $('infoDate'),
     infoWords: $('infoWords'),
@@ -172,27 +174,93 @@
     };
   }
 
-  function readFrontMatter(text) {
-    var match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (!match) return {};
+  function splitFrontMatter(text) {
+    var match = text.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+    if (!match) {
+      return { hasFrontMatter: false, frontMatter: '', body: text };
+    }
+    return {
+      hasFrontMatter: true,
+      frontMatter: match[1],
+      body: text.slice(match[0].length).replace(/^\r?\n+/, '')
+    };
+  }
 
+  function parseFrontMatter(raw) {
     var data = {};
-    match[1].split(/\r?\n/).forEach(function (line) {
+    if (!raw) return data;
+
+    raw.split(/\r?\n/).forEach(function (line) {
       var pair = line.match(/^([A-Za-z_][\w-]*):\s*(.*)$/);
-      if (!pair) return;
-      var value = pair[2].trim();
-      if ((value.charAt(0) === '"' && value.charAt(value.length - 1) === '"')
-        || (value.charAt(0) === "'" && value.charAt(value.length - 1) === "'")) {
-        value = value.slice(1, -1);
-      }
-      data[pair[1]] = value;
+      if (pair) data[pair[1]] = pair[2].trim();
     });
     return data;
   }
 
+  function stripQuotes(value) {
+    if (!value) return '';
+    value = String(value).trim();
+    if ((value.charAt(0) === '"' && value.charAt(value.length - 1) === '"')
+      || (value.charAt(0) === "'" && value.charAt(value.length - 1) === "'")) {
+      return value.slice(1, -1);
+    }
+    return value;
+  }
+
+  function formatTags(raw) {
+    if (!raw) return '';
+    var value = String(raw).trim();
+
+    if (value.charAt(0) === '[') {
+      try {
+        var array = JSON.parse(value);
+        if (Array.isArray(array)) {
+          return array.map(function (tag) { return stripQuotes(tag); }).filter(Boolean).join(', ');
+        }
+      } catch (e) {}
+      value = value.replace(/^\[|\]$/g, '');
+    }
+
+    return value.split(/[,，]/).map(function (tag) {
+      return stripQuotes(tag.trim());
+    }).filter(Boolean).join(', ');
+  }
+
+  function parseTagsInput(value) {
+    return value.split(/[,，]/).map(function (tag) {
+      return tag.trim();
+    }).filter(Boolean);
+  }
+
+  function setFrontMatterField(raw, key, value) {
+    var lines = raw ? raw.split(/\r?\n/) : [];
+    var pattern = new RegExp('^' + key + ':\\s*');
+    var output = [];
+    var found = false;
+    var skipping = false;
+
+    lines.forEach(function (line) {
+      if (skipping) {
+        if (/^\s+-\s+/.test(line) || /^\s*$/.test(line)) return;
+        skipping = false;
+      }
+
+      if (pattern.test(line)) {
+        found = true;
+        output.push(key + ': ' + value);
+        skipping = true;
+        return;
+      }
+
+      output.push(line);
+    });
+
+    if (!found) output.push(key + ': ' + value);
+    return output.join('\n');
+  }
+
   function countCharacters(text) {
-    var body = text.replace(/^---[\s\S]*?---\s*/, '');
-    return body.replace(/\s/g, '').length;
+    return text.replace(/\s/g, '').length;
   }
 
   function updateStats() {
@@ -203,33 +271,26 @@
     renderOutline();
 
     if (!current) return;
-    var frontMatter = readFrontMatter(text);
-    els.docTitle.textContent = frontMatter.title || current.info.title || '未命名日记';
+
+    var frontMatter = parseFrontMatter(current.frontMatter);
+    var title = els.metaTitle.value.trim() || current.info.title || '未命名日记';
+    var date = current.info.date || (frontMatter.date ? stripQuotes(frontMatter.date).slice(0, 10) : '未设置');
+
+    els.docTitle.textContent = title;
     els.infoCategory.textContent = current.info.category || '未分类';
-    els.infoDate.textContent = current.info.date
-      || (frontMatter.date ? String(frontMatter.date).slice(0, 10) : '未设置');
+    els.infoDate.textContent = date;
   }
 
   function renderOutline() {
     var lines = els.editor.value.split(/\r?\n/);
     var headings = [];
-    var inFrontMatter = false;
 
-    for (var i = 0; i < lines.length; i += 1) {
-      var line = lines[i];
-      if (i === 0 && line.trim() === '---') {
-        inFrontMatter = true;
-        continue;
-      }
-      if (inFrontMatter) {
-        if (line.trim() === '---') inFrontMatter = false;
-        continue;
-      }
+    lines.forEach(function (line, index) {
       var match = line.match(/^(#{1,4})\s+(.+?)\s*#*\s*$/);
       if (match) {
-        headings.push({ level: match[1].length, text: match[2], line: i });
+        headings.push({ level: match[1].length, text: match[2], line: index });
       }
-    }
+    });
 
     els.outline.textContent = '';
 
@@ -349,14 +410,25 @@
 
     setStatus('读取中...');
     return api('/contents/' + encPath(path) + '?ref=' + encodeURIComponent(BRANCH)).then(function (data) {
-      var text = b64ToText(data.content);
-      var frontMatter = readFrontMatter(text);
+      var split = splitFrontMatter(b64ToText(data.content));
+      var frontMatter = parseFrontMatter(split.frontMatter);
 
-      current = { path: path, sha: data.sha, info: parsePost(path) };
-      els.editor.value = text;
+      current = {
+        path: path,
+        sha: data.sha,
+        info: parsePost(path),
+        hasFrontMatter: split.hasFrontMatter,
+        frontMatter: split.frontMatter
+      };
+
+      els.editor.value = split.body;
       els.currentPath.textContent = path;
-      els.docTitle.textContent = frontMatter.title || current.info.title || '未命名日记';
+      els.metaTitle.value = stripQuotes(frontMatter.title || '');
+      els.metaTags.value = formatTags(frontMatter.tags);
+      els.metaTitle.disabled = false;
+      els.metaTags.disabled = false;
       dirty = false;
+
       updateStats();
       setSavedState('已保存', 'ok');
       setStatus('已加载');
@@ -404,6 +476,20 @@
       return;
     }
 
+    var body = els.editor.value.replace(/^\n+/, '');
+    var title = els.metaTitle.value.trim();
+    var tags = parseTagsInput(els.metaTags.value);
+    var content = body;
+
+    if (current.hasFrontMatter || title || tags.length) {
+      var frontMatter = current.hasFrontMatter ? current.frontMatter : '';
+      frontMatter = setFrontMatterField(frontMatter, 'title', JSON.stringify(title));
+      frontMatter = setFrontMatterField(frontMatter, 'tags', JSON.stringify(tags));
+      current.frontMatter = frontMatter;
+      current.hasFrontMatter = true;
+      content = '---\n' + frontMatter + '\n---\n\n' + body;
+    }
+
     setStatus('保存中...');
     setSavedState('保存中...', '');
 
@@ -411,7 +497,7 @@
       method: 'PUT',
       body: JSON.stringify({
         message: '更新日记: ' + labelFor(current.path),
-        content: textToB64(els.editor.value),
+        content: textToB64(content),
         sha: current.sha,
         branch: BRANCH
       })
@@ -431,6 +517,10 @@
     current = null;
     dirty = false;
     els.editor.value = '';
+    els.metaTitle.value = '';
+    els.metaTags.value = '';
+    els.metaTitle.disabled = true;
+    els.metaTags.disabled = true;
     els.docTitle.textContent = '未选择日记';
     els.currentPath.textContent = '从左侧选择一篇日记，或新建一篇';
     els.infoCategory.textContent = '—';
@@ -612,6 +702,18 @@
     var file = els.imageInput.files && els.imageInput.files[0];
     els.imageInput.value = '';
     if (file) uploadImage(file);
+  });
+
+  els.metaTitle.addEventListener('input', function () {
+    if (!current) return;
+    dirty = true;
+    updateStats();
+    setSavedState('未保存', 'dirty');
+  });
+  els.metaTags.addEventListener('input', function () {
+    if (!current) return;
+    dirty = true;
+    setSavedState('未保存', 'dirty');
   });
 
   els.toggleLibrary.addEventListener('click', togglePanel);
