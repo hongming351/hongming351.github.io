@@ -76,7 +76,16 @@
           <h2>我的日记</h2>
           <p id="postCount">0 篇</p>
         </div>
-        <button id="newPost" class="btn btn-primary btn-square" type="button" title="新建日记" aria-label="新建日记">+</button>
+        <div class="library-actions">
+          <button id="newPost" class="btn btn-primary btn-square" type="button" title="新建日记" aria-label="新建日记">+</button>
+          <button id="importPost" class="btn btn-primary btn-square" type="button" title="导入 Markdown" aria-label="导入 Markdown">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 16V4"></path>
+              <path d="m7 9 5-5 5 5"></path>
+              <path d="M5 20h14"></path>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -156,6 +165,22 @@
   <div id="drawerBackdrop" class="drawer-backdrop"></div>
 
   <input id="imageInput" type="file" accept="image/*" hidden>
+
+  <dialog id="importDialog" class="dialog">
+    <form id="importForm" class="dialog-form">
+      <div class="dialog-head">
+        <h2>导入 Markdown</h2>
+        <p>选择电脑里的 .md 文件，导入后可以直接继续编辑</p>
+      </div>
+      <label>Markdown 文件<input id="importFile" type="file" accept=".md,text/markdown" required></label>
+      <label>分类（可选）<input id="importCategory" placeholder="例如：生活"></label>
+      <label>保存为<input id="importName" placeholder="2026-11-08-标题.md" required></label>
+      <div class="dialog-actions">
+        <button id="cancelImport" class="btn btn-ghost" type="button">取消</button>
+        <button type="submit" class="btn btn-primary">导入并编辑</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="newDialog" class="dialog">
     <form id="newForm" class="dialog-form">

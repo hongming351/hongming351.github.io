@@ -118,11 +118,10 @@ textarea::placeholder {
   width: 38px;
   height: 38px;
   border-radius: 11px;
-  background: var(--accent);
+  background: rgba(255, 255, 255, 0.10);
   color: #fff;
   font-size: 18px;
   font-weight: 800;
-  box-shadow: 0 4px 14px rgba(79, 140, 255, 0.45);
 }
 
 .brand-text {
@@ -408,6 +407,16 @@ textarea::placeholder {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+
+.library-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.library-actions .btn-square svg {
+  width: 18px;
+  height: 18px;
 }
 
 .library-head h2 {
@@ -847,6 +856,12 @@ textarea::placeholder {
 
 .dialog-form input {
   width: 100%;
+}
+
+.dialog-form input[type="file"] {
+  height: auto;
+  padding: 9px;
+  border-style: dashed;
 }
 
 .form-grid {

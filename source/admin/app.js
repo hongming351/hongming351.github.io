@@ -20,6 +20,13 @@
     themeToggle: $('themeToggle'),
     postCount: $('postCount'),
     newPost: $('newPost'),
+    importPost: $('importPost'),
+    importDialog: $('importDialog'),
+    importForm: $('importForm'),
+    importFile: $('importFile'),
+    importCategory: $('importCategory'),
+    importName: $('importName'),
+    cancelImport: $('cancelImport'),
     search: $('search'),
     list: $('list'),
     docTitle: $('docTitle'),
@@ -629,6 +636,59 @@
     });
   }
 
+  function importPostFile(event) {
+    event.preventDefault();
+    if (!token) return;
+
+    var file = els.importFile.files && els.importFile.files[0];
+    if (!file) {
+      setStatus('请选择要导入的 Markdown 文件', 'error');
+      return;
+    }
+
+    var name = sanitizeName(els.importName.value.replace(/\.md$/i, ''));
+    if (!name) {
+      setStatus('请填写保存的文件名', 'error');
+      return;
+    }
+
+    var filename = name + '.md';
+    var category = els.importCategory.value.split('/').map(function (part) {
+      return sanitizeName(part);
+    }).filter(Boolean).join('/');
+    var path = POSTS_PREFIX + (category ? category + '/' : '') + filename;
+    var existing = files.filter(function (item) { return item.path === path; })[0];
+
+    if (existing && !confirm('「' + filename + '」已存在，确定覆盖吗？')) return;
+
+    setStatus('导入中...');
+    file.text().then(function (text) {
+      var payload = {
+        message: '导入日记: ' + filename,
+        content: textToB64(text),
+        branch: BRANCH
+      };
+      if (existing) payload.sha = existing.sha;
+
+      return api('/contents/' + encPath(path), {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+    }).then(function () {
+      els.importDialog.close();
+      els.importForm.reset();
+      dirty = false;
+      return loadFiles().then(function () {
+        return openFile(path);
+      });
+    }).then(function () {
+      setStatus('已导入「' + filename + '」', 'ok');
+    }).catch(function (error) {
+      setStatus(error.message, 'error');
+      setSavedState('导入失败', 'error');
+    });
+  }
+
   function insertText(before, after, placeholder) {
     var editor = els.editor;
     var start = editor.selectionStart;
@@ -695,6 +755,20 @@
   });
   els.cancelNew.addEventListener('click', function () { els.newDialog.close(); });
   els.newForm.addEventListener('submit', createPost);
+
+  els.importPost.addEventListener('click', function () {
+    els.importForm.reset();
+    els.importDialog.showModal();
+    els.importFile.focus();
+  });
+  els.cancelImport.addEventListener('click', function () { els.importDialog.close(); });
+  els.importForm.addEventListener('submit', importPostFile);
+  els.importFile.addEventListener('change', function () {
+    var file = els.importFile.files && els.importFile.files[0];
+    if (!file) return;
+    els.importName.value = sanitizeName(file.name.replace(/\.md$/i, '')) + '.md';
+  });
+
   els.save.addEventListener('click', save);
   els.remove.addEventListener('click', removePost);
   els.uploadImage.addEventListener('click', function () { els.imageInput.click(); });
