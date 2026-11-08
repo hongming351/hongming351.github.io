@@ -200,6 +200,25 @@
   background: #2f3a49;
 }
 
+.side-quote {
+  background: linear-gradient(135deg, #f7f9ff, #ffffff);
+}
+
+[data-user-color-scheme="dark"] .side-quote {
+  background: linear-gradient(135deg, #252d38, #2a3442);
+}
+
+.side-quote p {
+  margin: 0;
+  color: #4a5568;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+[data-user-color-scheme="dark"] .side-quote p {
+  color: #c4c6c9;
+}
+
 .side-edit {
   display: inline-flex;
   align-items: center;

@@ -1,5 +1,13 @@
 'use strict';
 
+hexo.extend.helper.register('side_recent_posts', function (current) {
+  return hexo.locals.get('posts')
+    .sort('date', -1)
+    .toArray()
+    .filter(function (post) { return post.path !== current.path; })
+    .slice(0, 5);
+});
+
 hexo.extend.helper.register('side_stats', function (post) {
   const text = String(post.content || '')
     .replace(/<[^>]*>/g, ' ')
@@ -18,9 +26,7 @@ hexo.extend.filter.register('theme_inject', function (injects) {
   var stats = side_stats(page);
   var categories = page.categories ? page.categories.toArray() : [];
   var tags = page.tags ? page.tags.toArray() : [];
-  var recent = site.posts.sort('date', -1).toArray()
-    .filter(function (post) { return post.path !== page.path; })
-    .slice(0, 5);
+  var recent = side_recent_posts(page);
   var editUrl = '/admin/?edit=' + encodeURIComponent('source/' + page.source);
 %>
 <aside class="sidebar post-side" style="margin-right: -1rem">
@@ -62,6 +68,12 @@ hexo.extend.filter.register('theme_inject', function (injects) {
       </div>
     <% } %>
     <a class="side-edit" href="<%= editUrl %>">编辑本文 →</a>
+  </section>
+
+  <section class="side-card side-quote">
+    <div class="side-title">今日一句</div>
+    <p>把今天写下来，明天就有迹可循。</p>
+    <a class="side-edit" href="/admin/">去写日记 →</a>
   </section>
 
   <% if (recent.length) { %>
