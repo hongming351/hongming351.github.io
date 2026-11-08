@@ -343,50 +343,85 @@
   box-shadow: 0 0 0 3px rgba(94, 214, 160, 0.16);
 }
 
-.connect-popover {
-  position: fixed;
-  top: 76px;
-  right: 18px;
-  z-index: 1080;
-  width: min(330px, calc(100vw - 24px));
-  padding: 16px;
+
+.connect-dialog {
+  width: min(420px, calc(100vw - 32px));
+  margin: auto;
+  padding: 22px;
   color: #3c4858;
   background: #fff;
-  border: 1px solid #eaecef;
-  border-radius: 14px;
-  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.25);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
 }
 
-.connect-popover.hidden {
-  display: none;
+.connect-dialog::backdrop {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
 }
 
-[data-user-color-scheme="dark"] .connect-popover {
+[data-user-color-scheme="dark"] .connect-dialog {
   color: #c4c6c9;
   background: #252d38;
-  border-color: #3a4657;
 }
 
-.connect-popover-title {
-  margin-bottom: 6px;
-  font-size: 14px;
+.connect-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.connect-dialog-title {
+  font-size: 16px;
   font-weight: 700;
 }
 
-.connect-popover p {
-  margin: 0 0 10px;
+.connect-dialog-head p {
+  margin: 4px 0 0;
   color: #718096;
   font-size: 12px;
   line-height: 1.6;
 }
 
-[data-user-color-scheme="dark"] .connect-popover p {
+[data-user-color-scheme="dark"] .connect-dialog-head p {
   color: #a7a9ad;
 }
 
-.connect-popover input {
+.connect-close {
+  margin-left: auto;
+  padding: 0 2px;
+  color: #a0aec0;
+  font-size: 20px;
+  line-height: 1;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.connect-close:hover {
+  color: #4a5568;
+}
+
+[data-user-color-scheme="dark"] .connect-close:hover {
+  color: #e8edf3;
+}
+
+.connect-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+  color: #718096;
+  font-size: 12px;
+}
+
+[data-user-color-scheme="dark"] .connect-field {
+  color: #a7a9ad;
+}
+
+.connect-field input {
   width: 100%;
-  height: 36px;
+  height: 38px;
   padding: 0 10px;
   color: inherit;
   font-size: 13px;
@@ -396,26 +431,33 @@
   outline: none;
 }
 
-.connect-popover input:focus {
+.connect-field input:focus {
   border-color: #4f8cff;
   box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.14);
 }
 
-[data-user-color-scheme="dark"] .connect-popover input {
+[data-user-color-scheme="dark"] .connect-field input {
   background: #1e2530;
   border-color: #3a4657;
 }
 
-.connect-actions {
+.connect-tip {
+  margin: 8px 0 0;
+  color: #a0aec0;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.connect-dialog-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .connect-primary {
   height: 34px;
-  padding: 0 14px;
+  padding: 0 16px;
   color: #fff;
   font-size: 13px;
   background: #2f4154;
@@ -433,7 +475,7 @@
   cursor: wait;
 }
 
-.connect-actions a {
+.connect-dialog-actions a {
   color: #1e88e5;
   font-size: 12px;
 }
@@ -455,11 +497,4 @@
 
 [data-user-color-scheme="dark"] .connect-status.ok {
   color: #5ed6a0;
-}
-
-@media (max-width: 991.98px) {
-  .connect-popover {
-    top: 68px;
-    right: 12px;
-  }
 }

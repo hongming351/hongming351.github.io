@@ -36,24 +36,33 @@
     li.appendChild(button);
     nav.appendChild(li);
 
-    var popover = document.createElement('div');
-    popover.className = 'connect-popover hidden';
-    popover.innerHTML = [
-      '<div class="connect-popover-title">连接 GitHub</div>',
-      '<p>粘贴只允许写入本仓库的 Token。Repository access 只选 hongming351.github.io，Contents 设为 Read and write。</p>',
-      '<input id="connect-token" type="password" placeholder="github_pat_..." autocomplete="off">',
-      '<div class="connect-actions">',
+    var dialog = document.createElement('dialog');
+    dialog.className = 'connect-dialog';
+    dialog.innerHTML = [
+      '<div class="connect-dialog-head">',
+      '  <div>',
+      '    <div class="connect-dialog-title">连接 GitHub</div>',
+      '    <p>粘贴只允许写入本仓库的 Token，连接后点「编辑」不再需要登录。</p>',
+      '  </div>',
+      '  <button type="button" class="connect-close" aria-label="关闭">×</button>',
+      '</div>',
+      '<label class="connect-field">Token',
+      '  <input id="connect-token" type="password" placeholder="github_pat_..." autocomplete="off">',
+      '</label>',
+      '<p class="connect-tip">Repository access 只选 hongming351.github.io，Contents 设为 Read and write。</p>',
+      '<div class="connect-dialog-actions">',
       '  <button id="connect-submit" class="connect-primary" type="button">连接</button>',
       '  <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">创建 Token</a>',
       '</div>',
       '<div id="connect-status" class="connect-status"></div>'
     ].join('');
-    document.body.appendChild(popover);
+    document.body.appendChild(dialog);
 
     var label = button.querySelector('.connect-label');
-    var input = popover.querySelector('#connect-token');
-    var submit = popover.querySelector('#connect-submit');
-    var status = popover.querySelector('#connect-status');
+    var input = dialog.querySelector('#connect-token');
+    var submit = dialog.querySelector('#connect-submit');
+    var status = dialog.querySelector('#connect-status');
+    var close = dialog.querySelector('.connect-close');
 
     function setStatus(text, ok) {
       status.textContent = text || '';
@@ -66,14 +75,22 @@
       button.title = connected ? '点击进入写日记' : '连接 GitHub';
     }
 
-    function openPopover() {
+    function openDialog() {
       setStatus('');
-      popover.classList.remove('hidden');
+      if (typeof dialog.showModal === 'function') {
+        dialog.showModal();
+      } else {
+        dialog.setAttribute('open', '');
+      }
       window.setTimeout(function () { input.focus(); }, 0);
     }
 
-    function closePopover() {
-      popover.classList.add('hidden');
+    function closeDialog() {
+      if (typeof dialog.close === 'function' && dialog.open) {
+        dialog.close();
+      } else {
+        dialog.removeAttribute('open');
+      }
     }
 
     function validate(token) {
@@ -110,7 +127,7 @@
         saveToken(token);
         setConnected(true);
         setStatus('连接成功', true);
-        window.setTimeout(closePopover, 700);
+        window.setTimeout(closeDialog, 700);
         input.value = '';
       }).catch(function (error) {
         setStatus(error.message || '网络连接失败');
@@ -124,22 +141,18 @@
         window.location.href = '/admin/';
         return;
       }
-      openPopover();
+      openDialog();
     });
 
     submit.addEventListener('click', submitToken);
     input.addEventListener('keydown', function (event) {
       if (event.key === 'Enter') submitToken();
     });
+    close.addEventListener('click', closeDialog);
 
-    document.addEventListener('click', function (event) {
-      if (popover.classList.contains('hidden')) return;
-      if (popover.contains(event.target) || button.contains(event.target)) return;
-      closePopover();
-    });
-
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') closePopover();
+    dialog.addEventListener('close', function () {
+      input.value = '';
+      setStatus('');
     });
 
     window.addEventListener('storage', function (event) {
