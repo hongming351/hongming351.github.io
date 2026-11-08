@@ -13,6 +13,7 @@ font:
   letter_spacing: 0.02em
 
 custom_css: /css/custom.css
+custom_js: /js/connect.js
 
 navbar:
   blog_title: "hongming351 的博客"
