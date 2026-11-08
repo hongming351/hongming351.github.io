@@ -15,6 +15,10 @@
     tokenClear: $('tokenClear'),
     loginHint: $('loginHint'),
     loginStatus: $('loginStatus'),
+    boot: $('boot'),
+    bootText: $('bootText'),
+    bootRetry: $('bootRetry'),
+    bootSwitch: $('bootSwitch'),
     workspace: $('workspace'),
     connectionState: $('connectionState'),
     themeToggle: $('themeToggle'),
@@ -100,16 +104,22 @@
       body: options.body
     }).then(function (response) {
       if (response.status === 401) {
-        throw new Error('Token 无效或已过期，请重新连接');
+        var unauthorized = new Error('Token 无效或已过期，请重新连接');
+        unauthorized.status = 401;
+        throw unauthorized;
       }
       if (response.status === 403) {
-        throw new Error('Token 权限不足或触发限流，请确认 Contents 权限为 Read and write');
+        var forbidden = new Error('Token 权限不足或触发限流，请确认 Contents 权限为 Read and write');
+        forbidden.status = 403;
+        throw forbidden;
       }
       if (!response.ok) {
         return response.json().catch(function () { return {}; }).then(function (data) {
           var message = '请求失败（' + response.status + '）';
           if (data && data.message) message += '：' + data.message;
-          throw new Error(message);
+          var requestError = new Error(message);
+          requestError.status = response.status;
+          throw requestError;
         });
       }
       if (response.status === 204) return null;
@@ -133,12 +143,38 @@
   }
 
   function setConnected(connected) {
+    if (connected) {
+      document.documentElement.setAttribute('data-has-token', '1');
+    } else {
+      document.documentElement.removeAttribute('data-has-token');
+    }
     els.loginHint.classList.toggle('hidden', connected);
     els.workspace.classList.toggle('hidden', !connected);
     els.tokenClear.classList.toggle('hidden', !connected);
     els.connectionState.classList.toggle('hidden', !connected);
+    els.boot.classList.add('hidden');
     els.tokenInput.value = '';
     els.tokenInput.placeholder = '粘贴 GitHub Token';
+  }
+
+  function showBoot() {
+    els.loginHint.classList.add('hidden');
+    els.workspace.classList.add('hidden');
+    els.boot.classList.remove('hidden');
+    els.boot.classList.remove('error');
+    els.bootText.textContent = '正在连接…';
+    els.bootRetry.classList.add('hidden');
+    els.bootSwitch.classList.add('hidden');
+  }
+
+  function showBootError(message) {
+    els.loginHint.classList.add('hidden');
+    els.workspace.classList.add('hidden');
+    els.boot.classList.remove('hidden');
+    els.boot.classList.add('error');
+    els.bootText.textContent = message || '连接失败，请检查网络后重试';
+    els.bootRetry.classList.remove('hidden');
+    els.bootSwitch.classList.remove('hidden');
   }
 
   function isMobile() {
@@ -482,7 +518,7 @@
     }
 
     localStorage.setItem(TOKEN_KEY, token);
-    setLoginStatus('连接中...');
+    showBoot();
 
     loadFiles().then(function () {
       setConnected(true);
@@ -496,10 +532,14 @@
         openFile(files[0].path);
       }
     }).catch(function (error) {
-      localStorage.removeItem(TOKEN_KEY);
-      token = '';
-      setConnected(false);
-      setLoginStatus(error.message);
+      if (error.status === 401) {
+        localStorage.removeItem(TOKEN_KEY);
+        token = '';
+        setConnected(false);
+        setLoginStatus(error.message);
+      } else {
+        showBootError(error.status ? error.message : '网络连接失败，请检查网络后重试');
+      }
     });
   }
 
@@ -795,6 +835,13 @@
   els.tokenSave.addEventListener('click', function () { connect(els.tokenInput.value); });
   els.tokenInput.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') connect(els.tokenInput.value);
+  });
+  els.bootRetry.addEventListener('click', function () { connect(token); });
+  els.bootSwitch.addEventListener('click', function () {
+    localStorage.removeItem(TOKEN_KEY);
+    token = '';
+    setConnected(false);
+    setLoginStatus('请粘贴新的 Token');
   });
   els.tokenClear.addEventListener('click', function () {
     localStorage.removeItem(TOKEN_KEY);

@@ -271,6 +271,61 @@ textarea::placeholder {
   line-height: 1;
 }
 
+html[data-has-token="1"] #loginHint {
+  display: none;
+}
+
+html:not([data-has-token="1"]) #boot {
+  display: none;
+}
+
+.boot {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+
+.boot-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--line);
+  border-top-color: #4f8cff;
+  border-radius: 50%;
+  animation: boot-spin 0.8s linear infinite;
+}
+
+@keyframes boot-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.boot p {
+  max-width: 520px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.boot-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.boot.error .boot-spinner {
+  display: none;
+}
+
+.boot.error p {
+  color: var(--danger);
+}
+
 .login-wrap {
   flex: 1 1 auto;
   display: flex;

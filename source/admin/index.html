@@ -25,6 +25,12 @@
       }
       document.documentElement.setAttribute('data-theme', schema);
     })();
+
+    try {
+      if (localStorage.getItem('hongming351.blog.admin.token')) {
+        document.documentElement.setAttribute('data-has-token', '1');
+      }
+    } catch (e) {}
   </script>
 </head>
 <body>
@@ -75,6 +81,15 @@
       <p class="muted">Token 只保存在当前浏览器，不会写入仓库或上传到任何服务器。没有 Token 的访客无法修改内容。</p>
       <div id="loginStatus" class="login-status"></div>
     </section>
+  </div>
+
+  <div id="boot" class="boot">
+    <div class="boot-spinner" aria-hidden="true"></div>
+    <p id="bootText">正在连接…</p>
+    <div class="boot-actions">
+      <button id="bootRetry" class="btn btn-primary hidden" type="button">重试</button>
+      <button id="bootSwitch" class="btn btn-ghost hidden" type="button">更换 Token</button>
+    </div>
   </div>
 
   <main id="workspace" class="workspace hidden">
