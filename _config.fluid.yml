@@ -1,0 +1,73 @@
+# Fluid 主题配置：只覆盖需要改动的项，其余使用主题默认值。
+# 完整配置说明：https://hexo.fluid-dev.com/docs/guide/
+
+favicon: /img/favicon.svg
+apple_touch_icon: /img/favicon.svg
+
+dark_mode:
+  enable: true
+  default: auto
+
+font:
+  font_size: 16px
+  letter_spacing: 0.02em
+
+custom_css: /css/custom.css
+
+navbar:
+  blog_title: "hongming351 的博客"
+  menu:
+    - { key: "home", link: "/", icon: "iconfont icon-home-fill" }
+    - { key: "archive", link: "/archives/", icon: "iconfont icon-archive-fill" }
+    - { key: "category", link: "/categories/", icon: "iconfont icon-category-fill" }
+    - { key: "tag", link: "/tags/", icon: "iconfont icon-tags-fill" }
+    - { name: "写日记", link: "/admin/" }
+
+search:
+  enable: true
+  path: /local-search.xml
+  generate_path: /local-search.xml
+  field: post
+  content: true
+
+index:
+  banner_img: /img/default.png
+  banner_img_height: 90
+  banner_mask_alpha: 0.28
+  slogan:
+    enable: true
+    text: "记录生活与学习"
+  auto_excerpt:
+    enable: true
+  post_meta:
+    date: true
+    category: true
+    tag: true
+
+post:
+  banner_img: /img/default.png
+  banner_img_height: 55
+  banner_mask_alpha: 0.28
+  meta:
+    author:
+      enable: false
+    date:
+      enable: true
+    wordcount:
+      enable: true
+    min2read:
+      enable: true
+  toc:
+    enable: true
+    expand_all: false
+    placement: right
+    collapseDepth: 2
+  copyright:
+    enable: false
+  prev_next:
+    enable: true
+  comments:
+    enable: false
+
+footer:
+  content: '<span>© 2026 hongming351</span> · Powered by <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> & <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="noopener">Fluid</a>'

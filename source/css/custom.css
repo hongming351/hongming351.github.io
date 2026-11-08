@@ -1,0 +1,16 @@
+.post-edit-link {
+  margin: 2.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(127, 127, 127, 0.35);
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.post-edit-link a {
+  opacity: 0.72;
+  transition: opacity 0.2s ease;
+}
+
+.post-edit-link a:hover {
+  opacity: 1;
+}
