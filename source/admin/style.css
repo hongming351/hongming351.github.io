@@ -462,6 +462,7 @@ textarea::placeholder {
 }
 
 .item {
+  flex: 0 0 auto;
   width: 100%;
   padding: 10px 12px;
   border: 0;
@@ -515,6 +516,7 @@ textarea::placeholder {
 }
 
 .empty {
+  flex: 0 0 auto;
   padding: 18px 10px;
   color: var(--muted);
   font-size: 13px;
@@ -770,6 +772,7 @@ textarea::placeholder {
 }
 
 .outline-item {
+  flex: 0 0 auto;
   width: 100%;
   padding: 5px 8px;
   border: 0;
