@@ -32,7 +32,6 @@ hexo.extend.filter.register('theme_inject', function (injects) {
 <aside class="sidebar post-side" style="margin-right: -1rem">
   <section class="side-card side-author-card">
     <div class="side-author">
-      <img class="side-avatar" src="/img/favicon.svg" alt="<%= config.author %>">
       <div class="side-author-text">
         <div class="side-name"><%= config.author %></div>
         <div class="side-bio"><%= config.subtitle || '记录生活与学习' %></div>
