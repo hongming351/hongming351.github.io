@@ -4,69 +4,125 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>日记管理</title>
+  <title>写日记 · hongming351</title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./style.css">
+  <script>
+    (function () {
+      var key = 'Fluid_Color_Scheme';
+      var schema = null;
+      try { schema = localStorage.getItem(key); } catch (e) {}
+      if (schema !== 'dark' && schema !== 'light') {
+        schema = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', schema);
+    })();
+  </script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">日记管理</div>
-    <div class="token-box">
-      <input id="tokenInput" type="password" placeholder="粘贴 GitHub Token" autocomplete="off">
-      <button id="tokenSave" class="primary" type="button">连接</button>
-      <button id="tokenClear" class="ghost hidden" type="button">退出</button>
+  <header class="appbar">
+    <a class="brand" href="/">
+      <span class="brand-mark">H</span>
+      <span class="brand-text">
+        <strong>写日记</strong>
+        <small>hongming351 的博客</small>
+      </span>
+    </a>
+    <div class="appbar-actions">
+      <span id="connectionState" class="status-chip hidden"><span class="status-dot"></span>已连接</span>
+      <button id="tokenClear" class="btn btn-ghost hidden" type="button">退出</button>
+      <button id="themeToggle" class="icon-btn" type="button" title="切换明暗主题" aria-label="切换明暗主题">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+        </svg>
+      </button>
+      <a class="icon-btn" href="/" title="返回博客" aria-label="返回博客">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 10.5 12 3l9 7.5"></path>
+          <path d="M5 9.5V21h14V9.5"></path>
+        </svg>
+      </a>
     </div>
   </header>
 
-  <div id="loginHint" class="login-hint">
-    <h2>连接你的博客仓库</h2>
-    <p>只需一次性创建一个访问令牌，之后所有写作都在本页完成，不会再跳转 GitHub。</p>
-    <ol>
-      <li>打开 <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub Token 创建页</a></li>
-      <li>Repository access 选择 <b>Only select repositories</b>，选中 <b>hongming351.github.io</b></li>
-      <li>Repository permissions 里把 <b>Contents</b> 设为 <b>Read and write</b></li>
-      <li>点击 Generate token，把 <code>github_pat_...</code> 粘贴到右上角输入框并点「连接」</li>
-    </ol>
-    <p class="muted">Token 只保存在当前浏览器（localStorage），不会写进仓库，也不会上传到任何服务器。没有 Token 的访客无法修改任何内容。</p>
-    <div id="loginStatus" class="login-status"></div>
+  <div id="loginHint" class="login-wrap">
+    <section class="login-card">
+      <span class="login-badge">日记后台</span>
+      <h1>开始写今天的日记</h1>
+      <p class="login-desc">首次使用需要一个只允许写入本仓库的 GitHub Token。连接后，新建、编辑、传图、发布都在本页完成。</p>
+      <ol class="steps">
+        <li>打开 <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub Token 创建页</a></li>
+        <li>Repository access 选择 <b>Only select repositories</b>，选中 <b>hongming351.github.io</b></li>
+        <li>Repository permissions 里把 <b>Contents</b> 设为 <b>Read and write</b></li>
+        <li>生成后把 <code>github_pat_...</code> 粘贴到下方输入框</li>
+      </ol>
+      <div class="token-row">
+        <input id="tokenInput" type="password" placeholder="粘贴 GitHub Token" autocomplete="off">
+        <button id="tokenSave" class="btn btn-primary" type="button">连接</button>
+      </div>
+      <p class="muted">Token 只保存在当前浏览器，不会写入仓库或上传到任何服务器。没有 Token 的访客无法修改内容。</p>
+      <div id="loginStatus" class="login-status"></div>
+    </section>
   </div>
 
   <main id="workspace" class="workspace hidden">
-    <aside class="sidebar">
-      <button id="newPost" class="primary wide" type="button">+ 新建日记</button>
-      <input id="search" type="search" placeholder="搜索文件名">
+    <aside class="card sidebar">
+      <button id="newPost" class="btn btn-primary btn-block" type="button">+ 新建日记</button>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <input id="search" type="search" placeholder="搜索日记">
+      </div>
       <div id="list" class="list"></div>
     </aside>
 
-    <section class="editor">
-      <div class="toolbar">
+    <section class="card editor">
+      <div class="editor-head">
         <span id="currentPath" class="path">未选择日记</span>
         <div class="actions">
-          <button type="button" data-before="**" data-after="**" data-placeholder="加粗文字" title="加粗">B</button>
-          <button type="button" data-before="## " title="标题">H2</button>
-          <button type="button" data-before="- " title="列表">列表</button>
-          <button type="button" data-before="[" data-after="]()" data-placeholder="链接文字" title="链接">链接</button>
-          <button id="uploadImage" type="button">图片</button>
-          <button id="save" class="primary" type="button">保存并发布</button>
-          <button id="remove" class="danger" type="button">删除</button>
+          <button type="button" class="tool-btn" data-before="**" data-after="**" data-placeholder="加粗文字" title="加粗">B</button>
+          <button type="button" class="tool-btn" data-before="## " title="二级标题">H2</button>
+          <button type="button" class="tool-btn" data-before="- " title="列表">列表</button>
+          <button type="button" class="tool-btn" data-before="[" data-after="]()" data-placeholder="链接文字" title="链接">链接</button>
+          <button id="uploadImage" type="button" class="tool-btn">图片</button>
+          <button id="save" type="button" class="btn btn-primary">保存并发布</button>
+          <button id="remove" type="button" class="btn btn-danger">删除</button>
         </div>
       </div>
       <textarea id="editor" spellcheck="false" placeholder="选择左侧日记，或点「新建日记」开始写。"></textarea>
-      <div id="status" class="status"></div>
+      <div class="editor-foot">
+        <div id="status" class="status"></div>
+        <div class="foot-meta">
+          <span id="wordCount">0 字</span>
+          <span class="kbd">Ctrl + S 保存</span>
+        </div>
+      </div>
     </section>
   </main>
 
   <input id="imageInput" type="file" accept="image/*" hidden>
 
-  <dialog id="newDialog">
-    <form id="newForm">
-      <h2>新建日记</h2>
+  <dialog id="newDialog" class="dialog">
+    <form id="newForm" class="dialog-form">
+      <div class="dialog-head">
+        <h2>新建日记</h2>
+        <p>文件名和 front-matter 会自动生成</p>
+      </div>
       <label>标题<input id="newTitle" required placeholder="例如：今天的天气"></label>
-      <label>日期<input id="newDate" type="date" required></label>
-      <label>分类（可选，会作为目录）<input id="newCategory" placeholder="例如：生活"></label>
-      <label>标签（可选，逗号分隔）<input id="newTags" placeholder="例如：随笔, 学习"></label>
+      <div class="form-grid">
+        <label>日期<input id="newDate" type="date" required></label>
+        <label>分类（可选）<input id="newCategory" placeholder="例如：生活"></label>
+      </div>
+      <label>标签（可选）<input id="newTags" placeholder="用逗号分隔，例如：随笔, 学习"></label>
       <div class="dialog-actions">
-        <button id="cancelNew" class="ghost" type="button">取消</button>
-        <button type="submit" class="primary">创建</button>
+        <button id="cancelNew" class="btn btn-ghost" type="button">取消</button>
+        <button type="submit" class="btn btn-primary">创建并开始写</button>
       </div>
     </form>
   </dialog>

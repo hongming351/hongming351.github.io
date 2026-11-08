@@ -15,6 +15,9 @@
     loginHint: $('loginHint'),
     loginStatus: $('loginStatus'),
     workspace: $('workspace'),
+    connectionState: $('connectionState'),
+    themeToggle: $('themeToggle'),
+    wordCount: $('wordCount'),
     newPost: $('newPost'),
     search: $('search'),
     list: $('list'),
@@ -108,10 +111,21 @@
     els.loginHint.classList.toggle('hidden', connected);
     els.workspace.classList.toggle('hidden', !connected);
     els.tokenClear.classList.toggle('hidden', !connected);
+    els.connectionState.classList.toggle('hidden', !connected);
     els.tokenInput.value = '';
-    els.tokenInput.placeholder = connected
-      ? '已连接，可粘贴新 Token 重新连接'
-      : '粘贴 GitHub Token';
+    els.tokenInput.placeholder = '粘贴 GitHub Token';
+    if (!connected) {
+      els.wordCount.textContent = '0 字';
+    }
+  }
+
+  function countCharacters(text) {
+    var body = text.replace(/^---[\s\S]*?---\s*/, '');
+    return body.replace(/\s/g, '').length;
+  }
+
+  function updateWordCount() {
+    els.wordCount.textContent = countCharacters(els.editor.value) + ' 字';
   }
 
   function labelFor(path) {
@@ -173,6 +187,7 @@
       els.editor.value = b64ToText(data.content);
       els.currentPath.textContent = labelFor(path);
       dirty = false;
+      updateWordCount();
       setStatus('已加载');
       history.replaceState(null, '', '?edit=' + encodeURIComponent(path));
       renderList();
@@ -249,6 +264,7 @@
       els.editor.value = '';
       els.currentPath.textContent = '未选择日记';
       dirty = false;
+      updateWordCount();
       history.replaceState(null, '', location.pathname);
       return loadFiles();
     }).then(function () {
@@ -379,6 +395,7 @@
     els.editor.value = '';
     els.currentPath.textContent = '未选择日记';
     els.list.textContent = '';
+    updateWordCount();
     setConnected(false);
     setLoginStatus('已退出，Token 已从浏览器清除', 'ok');
   });
@@ -409,7 +426,18 @@
     });
   });
 
-  els.editor.addEventListener('input', function () { dirty = true; });
+  els.themeToggle.addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try {
+      localStorage.setItem('Fluid_Color_Scheme', next);
+    } catch (e) {}
+  });
+
+  els.editor.addEventListener('input', function () {
+    dirty = true;
+    updateWordCount();
+  });
   els.editor.addEventListener('keydown', function (event) {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
       event.preventDefault();
