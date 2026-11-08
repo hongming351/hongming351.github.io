@@ -14,3 +14,275 @@
 .post-edit-link a:hover {
   opacity: 1;
 }
+
+.post-side {
+  font-size: 14px;
+}
+
+.post-side .side-card {
+  padding: 16px;
+  margin-bottom: 14px;
+  color: #3c4858;
+  background: #fff;
+  border: 1px solid #eaecef;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(31, 45, 61, 0.06);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+[data-user-color-scheme="dark"] .post-side .side-card {
+  color: #c4c6c9;
+  background: #252d38;
+  border-color: #3a4657;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.24);
+}
+
+.side-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.side-avatar {
+  display: block;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.side-author-text {
+  min-width: 0;
+}
+
+.side-name {
+  color: #2c3e50;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.side-bio {
+  margin-top: 3px;
+  color: #718096;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+[data-user-color-scheme="dark"] .side-name {
+  color: #e8edf3;
+}
+
+[data-user-color-scheme="dark"] .side-bio {
+  color: #a7a9ad;
+}
+
+.side-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.side-links a {
+  padding: 3px 9px;
+  color: #4a5568;
+  font-size: 12px;
+  line-height: 1.6;
+  background: #f4f6f9;
+  border-radius: 999px;
+}
+
+.side-links a:hover {
+  color: #1e88e5;
+  background: #e8f0fe;
+}
+
+[data-user-color-scheme="dark"] .side-links a {
+  color: #c4c6c9;
+  background: #1e2530;
+}
+
+[data-user-color-scheme="dark"] .side-links a:hover {
+  color: #4a9eff;
+  background: #2f3a49;
+}
+
+.side-title {
+  margin-bottom: 12px;
+  color: #718096;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-user-color-scheme="dark"] .side-title {
+  color: #a7a9ad;
+}
+
+.side-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.side-meta li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.side-meta span {
+  color: #718096;
+  white-space: nowrap;
+}
+
+.side-meta strong {
+  color: #3c4858;
+  font-weight: 500;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.side-meta a {
+  color: #1e88e5;
+}
+
+.side-meta a:hover {
+  color: #30a9de;
+}
+
+[data-user-color-scheme="dark"] .side-meta span {
+  color: #a7a9ad;
+}
+
+[data-user-color-scheme="dark"] .side-meta strong {
+  color: #c4c6c9;
+}
+
+[data-user-color-scheme="dark"] .side-meta a {
+  color: #4a9eff;
+}
+
+.side-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.side-tags a {
+  padding: 2px 8px;
+  color: #4a5568;
+  font-size: 12px;
+  background: #f4f6f9;
+  border-radius: 999px;
+}
+
+.side-tags a:hover {
+  color: #1e88e5;
+  background: #e8f0fe;
+}
+
+[data-user-color-scheme="dark"] .side-tags a {
+  color: #c4c6c9;
+  background: #1e2530;
+}
+
+[data-user-color-scheme="dark"] .side-tags a:hover {
+  color: #4a9eff;
+  background: #2f3a49;
+}
+
+.side-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: 14px;
+  padding-top: 12px;
+  color: #718096;
+  font-size: 12px;
+  border-top: 1px dashed #e6e9ef;
+}
+
+.side-edit:hover {
+  color: #1e88e5;
+}
+
+[data-user-color-scheme="dark"] .side-edit {
+  color: #a7a9ad;
+  border-top-color: #3a4657;
+}
+
+[data-user-color-scheme="dark"] .side-edit:hover {
+  color: #4a9eff;
+}
+
+.side-recent {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.side-recent li {
+  padding-bottom: 9px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.side-recent li:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.side-recent a {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #3c4858;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.side-recent a:hover {
+  color: #1e88e5;
+}
+
+.side-recent time {
+  display: block;
+  margin-top: 2px;
+  color: #a0aec0;
+  font-size: 11px;
+}
+
+[data-user-color-scheme="dark"] .side-recent li {
+  border-bottom-color: #3a4657;
+}
+
+[data-user-color-scheme="dark"] .side-recent a {
+  color: #c4c6c9;
+}
+
+[data-user-color-scheme="dark"] .side-recent a:hover {
+  color: #4a9eff;
+}
+
+[data-user-color-scheme="dark"] .side-recent time {
+  color: #7f8a99;
+}
+
+@media (max-width: 1199.98px) {
+  .post-side {
+    display: none;
+  }
+}
