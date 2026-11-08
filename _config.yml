@@ -29,6 +29,7 @@ category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
+  - admin/**
 
 # Writing
 new_post_name: :year-:month-:day-:title.md # File name of new posts
@@ -97,6 +98,12 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: landscape
+
+# Feed
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
 
 # Deployment
 ## 由 .github/workflows/pages.yml 在推送到 master 后自动构建并发布到 GitHub Pages。

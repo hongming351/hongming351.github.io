@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>日记管理</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">日记管理</div>
+    <div class="token-box">
+      <input id="tokenInput" type="password" placeholder="粘贴 GitHub Token" autocomplete="off">
+      <button id="tokenSave" class="primary" type="button">连接</button>
+      <button id="tokenClear" class="ghost hidden" type="button">退出</button>
+    </div>
+  </header>
+
+  <div id="loginHint" class="login-hint">
+    <h2>连接你的博客仓库</h2>
+    <p>只需一次性创建一个访问令牌，之后所有写作都在本页完成，不会再跳转 GitHub。</p>
+    <ol>
+      <li>打开 <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub Token 创建页</a></li>
+      <li>Repository access 选择 <b>Only select repositories</b>，选中 <b>hongming351.github.io</b></li>
+      <li>Repository permissions 里把 <b>Contents</b> 设为 <b>Read and write</b></li>
+      <li>点击 Generate token，把 <code>github_pat_...</code> 粘贴到右上角输入框并点「连接」</li>
+    </ol>
+    <p class="muted">Token 只保存在当前浏览器（localStorage），不会写进仓库，也不会上传到任何服务器。没有 Token 的访客无法修改任何内容。</p>
+    <div id="loginStatus" class="login-status"></div>
+  </div>
+
+  <main id="workspace" class="workspace hidden">
+    <aside class="sidebar">
+      <button id="newPost" class="primary wide" type="button">+ 新建日记</button>
+      <input id="search" type="search" placeholder="搜索文件名">
+      <div id="list" class="list"></div>
+    </aside>
+
+    <section class="editor">
+      <div class="toolbar">
+        <span id="currentPath" class="path">未选择日记</span>
+        <div class="actions">
+          <button type="button" data-before="**" data-after="**" data-placeholder="加粗文字" title="加粗">B</button>
+          <button type="button" data-before="## " title="标题">H2</button>
+          <button type="button" data-before="- " title="列表">列表</button>
+          <button type="button" data-before="[" data-after="]()" data-placeholder="链接文字" title="链接">链接</button>
+          <button id="uploadImage" type="button">图片</button>
+          <button id="save" class="primary" type="button">保存并发布</button>
+          <button id="remove" class="danger" type="button">删除</button>
+        </div>
+      </div>
+      <textarea id="editor" spellcheck="false" placeholder="选择左侧日记，或点「新建日记」开始写。"></textarea>
+      <div id="status" class="status"></div>
+    </section>
+  </main>
+
+  <input id="imageInput" type="file" accept="image/*" hidden>
+
+  <dialog id="newDialog">
+    <form id="newForm">
+      <h2>新建日记</h2>
+      <label>标题<input id="newTitle" required placeholder="例如：今天的天气"></label>
+      <label>日期<input id="newDate" type="date" required></label>
+      <label>分类（可选，会作为目录）<input id="newCategory" placeholder="例如：生活"></label>
+      <label>标签（可选，逗号分隔）<input id="newTags" placeholder="例如：随笔, 学习"></label>
+      <div class="dialog-actions">
+        <button id="cancelNew" class="ghost" type="button">取消</button>
+        <button type="submit" class="primary">创建</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
