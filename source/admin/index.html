@@ -6,7 +6,15 @@
   <meta name="robots" content="noindex, nofollow">
   <title>写日记 · hongming351</title>
   <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
+  <script>
+    (function () {
+      window.__adminVersion = '?v=' + Date.now();
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = './style.css' + window.__adminVersion;
+      document.head.appendChild(link);
+    })();
+  </script>
   <script>
     (function () {
       var key = 'Fluid_Color_Scheme';
@@ -175,6 +183,7 @@
       <label>Markdown 文件<input id="importFile" type="file" accept=".md,text/markdown" required></label>
       <label>分类（可选）<input id="importCategory" placeholder="例如：生活"></label>
       <label>保存为<input id="importName" placeholder="2026-11-08-标题.md" required></label>
+      <div id="importStatus" class="login-status"></div>
       <div class="dialog-actions">
         <button id="cancelImport" class="btn btn-ghost" type="button">取消</button>
         <button type="submit" class="btn btn-primary">导入并编辑</button>
@@ -201,6 +210,12 @@
     </form>
   </dialog>
 
-  <script src="./app.js"></script>
+  <script>
+    (function () {
+      var script = document.createElement('script');
+      script.src = './app.js' + (window.__adminVersion || ('?v=' + Date.now()));
+      document.body.appendChild(script);
+    })();
+  </script>
 </body>
 </html>

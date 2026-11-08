@@ -26,6 +26,7 @@
     importFile: $('importFile'),
     importCategory: $('importCategory'),
     importName: $('importName'),
+    importStatus: $('importStatus'),
     cancelImport: $('cancelImport'),
     search: $('search'),
     list: $('list'),
@@ -642,13 +643,13 @@
 
     var file = els.importFile.files && els.importFile.files[0];
     if (!file) {
-      setStatus('请选择要导入的 Markdown 文件', 'error');
+      els.importStatus.textContent = '请选择要导入的 Markdown 文件';
       return;
     }
 
     var name = sanitizeName(els.importName.value.replace(/\.md$/i, ''));
     if (!name) {
-      setStatus('请填写保存的文件名', 'error');
+      els.importStatus.textContent = '请填写保存的文件名';
       return;
     }
 
@@ -661,7 +662,8 @@
 
     if (existing && !confirm('「' + filename + '」已存在，确定覆盖吗？')) return;
 
-    setStatus('导入中...');
+    els.importStatus.textContent = '导入中...';
+    els.importStatus.className = 'login-status';
     file.text().then(function (text) {
       var payload = {
         message: '导入日记: ' + filename,
@@ -677,6 +679,7 @@
     }).then(function () {
       els.importDialog.close();
       els.importForm.reset();
+      els.importStatus.textContent = '';
       dirty = false;
       return loadFiles().then(function () {
         return openFile(path);
@@ -684,7 +687,8 @@
     }).then(function () {
       setStatus('已导入「' + filename + '」', 'ok');
     }).catch(function (error) {
-      setStatus(error.message, 'error');
+      els.importStatus.textContent = error.message;
+      els.importStatus.className = 'login-status';
       setSavedState('导入失败', 'error');
     });
   }
@@ -758,6 +762,8 @@
 
   els.importPost.addEventListener('click', function () {
     els.importForm.reset();
+    els.importStatus.textContent = '';
+    els.importStatus.className = 'login-status';
     els.importDialog.showModal();
     els.importFile.focus();
   });
