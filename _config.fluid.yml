@@ -64,6 +64,11 @@ post:
     enable: false
   prev_next:
     enable: true
+  mermaid:
+    enable: true
+    specific: false
+    options:
+      theme: 'default'
   comments:
     enable: false
 
